@@ -1,0 +1,30 @@
+# Import the libraries
+import pandas as pd 
+import numpy as np 
+import datetime as dt 
+
+# Use our location of file for data source
+data_source = r"/Users/rohanmorar/Desktop/DJIStockInfo.csv"
+
+# Creates table with data from csv.
+table = pd.read_csv(data_source, index_col = "Date")
+
+# Number of days forward
+ndayforward = 2
+
+# Create column of daily % change based on closed price
+table["day_change"] = (table["close"].pct_change())*100
+
+# Uses ndayforward to look forward 2 days (based on how many days you put in ndaysforward)
+table["nday_change"] = table["day_change"].shift(-ndayforward)
+
+
+# Set criteria for range of dates/ set criteria for daily change 
+daterange_criteria = (table.index >= "1985-01-29") & (table.index <= "2018-04-18")
+tcriteria = table["day_change"] < -1 
+
+# Set main criteria variable that takes in daterange_criteria and tcriteria
+criteria = (daterange_criteria) & (tcriteria)
+
+# Print out mean media and std using close and nday_change
+print(table[criteria].loc[:,["close","nday_change"]].agg(["mean", "median", "std"]))
